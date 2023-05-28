@@ -1166,6 +1166,7 @@ def main():
         # Note: os_ipl_token is not a secret
         properties=dict(required=False, type='dict', default={}),
         log_file=dict(required=False, type='str', default=None),
+        load_address=dict(required=False, type='str', default=DEFAULT_LOAD_ADDRESS),
         _faked_session=dict(required=False, type='raw'),
     )
 
