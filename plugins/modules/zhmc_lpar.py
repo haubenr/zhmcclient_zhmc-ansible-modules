@@ -216,6 +216,9 @@ options:
          'last-used-load-address' property of the LPAR is used when the
          LPAR needs to be loaded."
       - "This parameter is not allowed for the other C(state) values."
+    type: str
+    required: false
+    default: null
   log_file:
     description:
       - "File path of a log file to which the logic flow of this module as well
