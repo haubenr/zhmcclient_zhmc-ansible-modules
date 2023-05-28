@@ -208,6 +208,14 @@ options:
     type: dict
     required: false
     default: null
+  load_address:
+    description:
+      - "The device address from which the LPAR is to be loaded, 
+         for C(state=active) and C(state=loaded)."
+      - "Default: The device address specified in the
+         'last-used-load-address' property of the LPAR is used when the
+         LPAR needs to be loaded."
+      - "This parameter is not allowed for the other C(state) values."
   log_file:
     description:
       - "File path of a log file to which the logic flow of this module as well
@@ -524,6 +532,7 @@ LOGGER = logging.getLogger(LOGGER_NAME)
 # Defaults for module input parameters
 DEFAULT_ACTIVATION_PROFILE_NAME = None
 DEFAULT_FORCE = False
+DEFAULT_LOAD_ADDRESS = None
 
 # Dictionary of properties of LPAR resources, in this format:
 #   name: (allowed, create, update, update_while_active, eq_func, type_cast)
@@ -967,6 +976,7 @@ def ensure_loaded(params, check_mode):
     activation_profile_name = params.get(
         'activation_profile_name', DEFAULT_ACTIVATION_PROFILE_NAME)
     force = params.get('force', DEFAULT_FORCE)
+    load_address = params.get('load_address', DEFAULT_LOAD_ADDRESS)
 
     changed = False
     result = {}
@@ -984,7 +994,7 @@ def ensure_loaded(params, check_mode):
         changed |= ensure_lpar_loaded(
             LOGGER, lpar, check_mode,
             activation_profile_name=activation_profile_name,
-            force=force)
+            force=force, load_address=load_address)
 
         # Update the properties of the LPAR.
         lpar.pull_full_properties()

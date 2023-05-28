@@ -664,7 +664,7 @@ def ensure_lpar_active(
 
 
 def ensure_lpar_loaded(
-        logger, lpar, check_mode, activation_profile_name, force):
+        logger, lpar, check_mode, activation_profile_name, force, load_address):
     """
     Ensure that the LPAR is loaded, regardless of what its current operational
     status is.
@@ -705,6 +705,11 @@ def ensure_lpar_loaded(
 
         TODO: Verify the statements in the description of the 'force' parameter.
 
+      load_address (string): The device address (e.g. of a disk device) the LPAR
+        is to be loaded from. If None, the LPAR is loaded from the device address
+        it was loaded from the last time (determined via the
+        'last-used-load-address' LPAR property).
+
     Returns:
       bool: Indicates whether the LPAR was changed.
 
@@ -736,7 +741,7 @@ def ensure_lpar_loaded(
     if status == 'not-operating':
         # The LPAR was defined not to auto-load, so we load it.
         if not check_mode:
-            lpar.load()
+            lpar.load(load_address=load_address)
             status = pull_lpar_status(lpar)
         changed = True
 
