@@ -615,6 +615,7 @@ ZHMC_LPAR_PROPERTIES = {
     'zaware_dns_info': (True, False, True, True, None, None),  # Array of ip_info objects
     'central_storage': (True, False, True, True, None, int),
     'number_shared_ifl_processors': (True, False, True, True, None, int),
+    'number_dedicated_ifl_processors': (True, False, True, True, None, int),
     'processor_usage': (True, False, True, True, None, None),
 
     # read_only properties:
@@ -1112,8 +1113,17 @@ def facts(params, check_mode):
 
         lpar = cpc.lpars.find(name=lpar_name)
         lpar.pull_full_properties()
+        lpar_properties = lpar.properties
 
-        result = dict(lpar.properties)
+        image_profile = cpc.image_activation_profiles.find(name=lpar_name)
+        image_profile.pull_full_properties()
+        image_profile_properties = image_profile.properties
+
+        result = {
+            "lpar_properties": lpar_properties,
+            "image_profile_properties": image_profile_properties
+        }
+
         add_artificial_properties(result, lpar)
 
         return changed, result
