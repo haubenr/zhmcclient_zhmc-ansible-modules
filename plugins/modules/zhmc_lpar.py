@@ -1026,7 +1026,7 @@ def ensure_loaded(params, check_mode):
         close_session(session, logoff)
 
 
-def ensure_set(params, check_mode):
+def ensure_set_lpar(params, check_mode):
     """
     Ensure that the LPAR properties have been updated, without activating
     or deactivating the LPAR.
@@ -1084,7 +1084,7 @@ def ensure_set(params, check_mode):
         close_session(session, logoff)
 
 
-def facts(params, check_mode):
+def facts_lpar(params, check_mode):
     """
     Return LPAR facts.
 
@@ -1099,8 +1099,7 @@ def facts(params, check_mode):
     properties = params.get('properties', None)
     if properties:
         raise ParameterError(
-            "Properties must not be specified for state=facts with "
-            "LPAR {0!r}.".format(lpar_name))
+            "Properties must not be specified for state=facts_lpar")
 
     changed = False
     result = {}
@@ -1115,16 +1114,49 @@ def facts(params, check_mode):
         lpar.pull_full_properties()
         lpar_properties = lpar.properties
 
-        image_profile = cpc.image_activation_profiles.find(name=lpar_name)
+        result = dict(lpar_properties)
+
+        add_artificial_properties(result, lpar)
+
+        return changed, result
+
+    finally:
+        close_session(session, logoff)
+
+
+def facts_profile(params, check_mode):
+    """
+    Return LPAR profile facts.
+
+    Raises:
+      ParameterError: An issue with the module parameters.
+      zhmcclient.Error: Any zhmcclient exception can happen.
+    """
+
+    cpc_name = params['cpc_name']
+    profile_name = params['activation_profile_name']
+
+    properties = params.get('properties', None)
+    if properties:
+        raise ParameterError(
+            "Properties must not be specified for state=facts_profile")
+
+    changed = False
+    result = {}
+
+    session, logoff = open_session(params)
+    try:
+        # The default exception handling is sufficient for this code
+        client = zhmcclient.Client(session)
+        cpc = client.cpcs.find(name=cpc_name)
+
+        image_profile = cpc.image_activation_profiles.find(name=profile_name)
         image_profile.pull_full_properties()
         image_profile_properties = image_profile.properties
 
-        result = {
-            "lpar_properties": lpar_properties,
-            "image_profile_properties": image_profile_properties
-        }
+        result = dict(image_profile_properties)
 
-        add_artificial_properties(result, lpar)
+        add_artificial_properties(result, None)
 
         return changed, result
 
@@ -1150,10 +1182,7 @@ def ensure_set_profile(params, check_mode):
         image_profile = cpc.image_activation_profiles.find(name=profile_name)
 
         image_profile.pull_full_properties()
-        image_profile_properties = dict(image_profile.properties)
-
-        updates = image_profile_properties.copy()
-        updates.update(dict(properties))
+        updates = dict(properties)
 
         image_profile.update_properties(updates)
         changed = True
@@ -1185,9 +1214,10 @@ def perform_task(params, check_mode):
         'reset_normal': perform_reset_normal,
         'active': ensure_active,
         'loaded': ensure_loaded,
-        'set': ensure_set,
-        'facts': facts,
+        'set_lpar': ensure_set_lpar,
         'set_profile': ensure_set_profile,
+        'facts_lpar': facts_lpar,
+        'facts_profile': facts_profile,
     }
     return actions[params['state']](params, check_mode)
 
@@ -1204,7 +1234,7 @@ def main():
         state=dict(
             required=True, type='str',
             choices=['inactive', 'reset_clear', 'reset_normal', 'active',
-                     'loaded', 'set', 'facts', 'set_profile']),
+                     'loaded', 'set_lpar', 'set_profile', 'facts_lpar', 'facts_profile']),
         activation_profile_name=dict(
             required=False, type='str',
             default=DEFAULT_ACTIVATION_PROFILE_NAME),
