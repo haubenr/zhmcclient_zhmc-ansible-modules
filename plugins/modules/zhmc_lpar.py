@@ -613,8 +613,8 @@ ZHMC_LPAR_PROPERTIES = {
     'zaware_network_info': (True, False, True, True, None, None),  # Array of zaware_network objects
     'zaware_gateway_info': (True, False, True, True, None, None),  # ip_info object
     'zaware_dns_info': (True, False, True, True, None, None),  # Array of ip_info objects
-    'central-storage': (True, False, True, True, None, int),
-    'number-shared-ifl-processors': (True, False, True, True, None, int),
+    'central_storage': (True, False, True, True, None, int),
+    'number_shared_ifl_processors': (True, False, True, True, None, int),
 
     # read_only properties:
     'object_uri': (False, False, False, None, None, None),
