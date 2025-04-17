@@ -615,6 +615,7 @@ ZHMC_LPAR_PROPERTIES = {
     'zaware_dns_info': (True, False, True, True, None, None),  # Array of ip_info objects
     'central_storage': (True, False, True, True, None, int),
     'number_shared_ifl_processors': (True, False, True, True, None, int),
+    'processor_usage': (True, False, True, True, None, None),
 
     # read_only properties:
     'object_uri': (False, False, False, None, None, None),
@@ -648,7 +649,6 @@ ZHMC_LPAR_PROPERTIES = {
     'last_used_boot_record_logical_block_address': (False, False, False, None, None, None),
     'current_processing_weight': (False, False, False, None, None, None),
     'current_processing_weight_capped': (False, False, False, None, None, None),
-    'processor_usage': (False, False, False, None, None, None),
     'number_general_purpose_processors': (False, False, False, None, None, None),
     'number_reserved_general_purpose_processors': (False, False, False, None, None, None),
     'number_icf_processors': (False, False, False, None, None, None),
