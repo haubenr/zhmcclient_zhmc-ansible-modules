@@ -1132,6 +1132,40 @@ def facts(params, check_mode):
         close_session(session, logoff)
 
 
+def ensure_set_profile(params, check_mode):
+    cpc_name = params['cpc_name']
+    profile_name = params['activation_profile_name']
+    properties = params.get('properties', None)
+
+    changed = False
+    result = {}
+
+    if not properties:
+        return changed, result
+
+    session, logoff = open_session(params)
+    try:
+        client = zhmcclient.Client(session)
+        cpc = client.cpcs.find(name=cpc_name)
+        image_profile = cpc.image_activation_profiles.find(name=profile_name)
+
+        image_profile.pull_full_properties()
+        image_profile_properties = dict(image_profile.properties)
+
+        updates = image_profile_properties.copy()
+        updates.update(dict(properties))
+
+        image_profile.update_properties(updates)
+        changed = True
+
+        result = updates
+        add_artificial_properties(result, None)
+
+        return changed, result
+    finally:
+        close_session(session, logoff)
+
+
 def perform_task(params, check_mode):
     """
     Perform the task for this module, dependent on the 'state' module
@@ -1153,6 +1187,7 @@ def perform_task(params, check_mode):
         'loaded': ensure_loaded,
         'set': ensure_set,
         'facts': facts,
+        'set_profile': ensure_set_profile,
     }
     return actions[params['state']](params, check_mode)
 
@@ -1169,7 +1204,7 @@ def main():
         state=dict(
             required=True, type='str',
             choices=['inactive', 'reset_clear', 'reset_normal', 'active',
-                     'loaded', 'set', 'facts']),
+                     'loaded', 'set', 'facts', 'set_profile']),
         activation_profile_name=dict(
             required=False, type='str',
             default=DEFAULT_ACTIVATION_PROFILE_NAME),
